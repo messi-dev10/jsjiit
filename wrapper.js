@@ -1,3 +1,4 @@
+let session;
 class APIError extends Error {
   constructor(message) {
     super(message);
@@ -5,10 +6,26 @@ class APIError extends Error {
   }
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function authenticated(method) {
+  /**
+   * @param {Function} method - A method of WebPortal class
+   * @returns {Function} - A wrapper for the method with session validation checks
+   */
+  return function (...args) {
+    if (this.session == null) {
+      throw new NotLoggedIn();
+    }
+
+    // Uncomment this block if session expiry check is needed
+    // if (this.session.expiry < new Date()) {
+    //     throw new SessionExpired();
+    // }
+
+    return method.apply(this, args);
+  };
 }
-async function __hit(method, url, options = {}, passed_headers= {}) {
+
+async function __hit(method, url, options = {}, passed_headers = {}) {
   let exception = APIError; // Default exception
 
   // If an exception is provided in options, use that
@@ -26,7 +43,7 @@ async function __hit(method, url, options = {}, passed_headers= {}) {
     delete options.authenticated;
   } else {
     let localname = await generateLocalName();
-    headers = { LocalName: localname }; // Assuming generateLocalName is defined elsewhere
+    headers = { LocalName: localname };
   }
 
   // Merge provided headers with default headers
@@ -35,25 +52,26 @@ async function __hit(method, url, options = {}, passed_headers= {}) {
   } else {
     options.headers = headers;
   }
-  console.log({
+
+  let fetchOptions = {
     method: method,
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
     },
-    body: options.body,
-  });
+  };
+
+  if (options.json) {
+    fetchOptions.body = JSON.stringify(options.json);
+  } else {
+    fetchOptions.body = options.body;
+  }
+
+  console.log(fetchOptions);
 
   try {
     // Make the request using fetch
-    const response = await fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
-      body: options.body,
-    });
+    const response = await fetch(url, fetchOptions);
 
     // Convert the response to JSON
     const resp = await response.json();
@@ -115,27 +133,51 @@ class WebPortalSession {
   }
 
   getHeaders(localname) {
-	return {
-		Authorization: `Bearer ${this.token}`,
-		LocalName: localname
-	};
+    return {
+      Authorization: `Bearer ${this.token}`,
+      LocalName: localname,
+    };
   }
 }
 
-
 async function get_attendance_meta(username, password) {
-	ENDPOINT = "/StudentClassAttendance/getstudentInforegistrationforattendence"
+  ENDPOINT = "/StudentClassAttendance/getstudentInforegistrationforattendence";
 
-	const session = await student_login(username, password);
-	payload = {
-		"clientid": session.clientid,
-		"instituteid": session.instituteid,
-		"membertype": session.membertype
-	}
+  session = await student_login(username, password);
+  payload = {
+    clientid: session.clientid,
+    instituteid: session.instituteid,
+    membertype: session.membertype,
+  };
 
-	const localname = await generateLocalName();
-	let headers = session.getHeaders(localname);
-	resp = await __hit("POST", API + ENDPOINT, { body: payload, authenticated: true }, headers);
-	console.log("attendance meta");
-	console.log(resp);
+  const localname = await generateLocalName();
+  let _headers = session.getHeaders(localname);
+  resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
+  console.log("attendance meta");
+  console.log(resp);
+
+  return new AttendanceMeta(resp["response"]);
+}
+
+async function get_attendance(header, semester) {
+
+  const ENDPOINT = "/StudentClassAttendance/getstudentattendancedetail";
+
+  const payload = {
+    clientid: session.clientid,
+    instituteid: session.instituteid,
+    registrationcode: semester.registration_code,
+    registrationid: semester.registration_id,
+    stynumber: header.stynumber,
+  };
+  console.log("payload")
+  console.log(payload);
+
+  const localname = await generateLocalName();
+  let _headers = session.getHeaders(localname);
+  return __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers)
+    .then((resp) => resp.response)
+    .catch((error) => {
+      throw new APIError(error);
+    });
 }

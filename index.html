@@ -16,14 +16,24 @@
     <script src="utils.js"></script>
     <script src="encryption.js"></script>
     <script src="wrapper.js"></script>
+    <script src="attendance.js"></script>
     <script>
       function signin(){
         let user = document.getElementById("user");
         let pass = document.getElementById("pass");
 
-        let x = get_attendance_meta(user.value, pass.value);
-        // console.log(x)
-        // console.log(typeof(x))
+        get_attendance_meta(user.value, pass.value).then(meta => {
+          let sem = meta.latestSemester();
+          let header = meta.latestHeader();
+          console.log("Latest semester:", sem);
+          console.log("Latest header:", header);
+          return get_attendance(header, sem);
+        }).then(attendance => {
+          console.log("xxxxxx")
+          console.log(attendance);
+        }).catch(error => {
+          console.error("Error fetching attendance:", error);
+        });
       }
     </script>
 </body>
