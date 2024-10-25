@@ -14,10 +14,10 @@ print("done")
 
 
 port = 8000
-httpd = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
+httpd = HTTPServer(('localhost', port), SimpleHTTPRequestHandler)
 
 ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 ctx.load_cert_chain(keyfile='key.pem', certfile='cert.pem')
 httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True)
-print(f"Server running on https://0.0.0.0:{port}")
+print(f"Server running on https://localhost:{port}")
 httpd.serve_forever()
