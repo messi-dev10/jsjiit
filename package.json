@@ -1,0 +1,47 @@
+{
+  "name": "jsjiit",
+  "version": "0.0.1",
+  "description": "Browser-compatible API for interacting with JIIT (Jaypee Institute of Information Technology) WebPortal. Bypasses CAPTCHA :)",
+  "main": "src/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs": "jsdoc -c jsdoc.conf.json --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeblech/jsjiit.git"
+  },
+  "keywords": [
+    "jaypee",
+    "jpee",
+    "jayp",
+    "jiit",
+    "pyjiit",
+    "jsjiit",
+    "portal",
+    "jportal",
+    "webportal",
+    "attendance",
+    "attendance-api",
+    "attendance-web",
+    "attendance-api-web",
+    "attendance-web-api",
+    "jaypee-attendance",
+    "jaypee-attendance-api",
+    "jaypee-attendance-web",
+    "jaypee-attendance-web-api",
+    "jaypee-attendance-api-web"
+  ],
+  "author": "codeblech",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/codeblech/jsjiit/issues"
+  },
+  "homepage": "https://github.com/codeblech/jsjiit#readme",
+  "devDependencies": {
+    "jsdoc": "^4.0.4"
+  }
+}

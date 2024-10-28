@@ -1,4 +1,7 @@
 /**
+ * @module Utils
+ */
+/**
  * Generates a date sequence string from a given date or current date
  * The sequence format is: d[0]m[0]y[0]w[0]d[1]m[1]y[1] where:
  * d = day padded to 2 digits
@@ -8,7 +11,7 @@
  * @param {Date} [date=null] - Date object to generate sequence from. If null, uses current date
  * @returns {string} The generated date sequence string
  */
-function generate_date_seq(date = null) {
+export function generate_date_seq(date = null) {
   if (date === null) {
     date = new Date();
   }
@@ -25,7 +28,7 @@ function generate_date_seq(date = null) {
  * @param {number} n - Length of random string to generate
  * @returns {string} Random string of length n containing alphanumeric characters
  */
-function get_random_char_seq(n) {
+export function get_random_char_seq(n) {
   const charset = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let result = "";
 

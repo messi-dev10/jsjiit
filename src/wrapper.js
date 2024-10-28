@@ -1,4 +1,7 @@
 /**
+ * @module Wrapper
+ */
+/**
  * Base API endpoint for the JIIT web portal
  * @constant {string}
  */
@@ -205,7 +208,11 @@ class WebPortal {
       newpassword: new_password,
       confirmpassword: new_password,
     };
-    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true, exception: AccountAPIError });
+    const resp = await this.__hit("POST", API + ENDPOINT, {
+      json: payload,
+      authenticated: true,
+      exception: AccountAPIError,
+    });
     return resp["response"];
   }
 
@@ -499,26 +506,28 @@ function authenticated(method) {
  * @constant {Array<string>}
  */
 const authenticatedMethods = [
-  'get_personal_info',
-  'get_student_bank_info',
-  'change_password',
-  'get_attendance_meta',
-  'get_attendance',
-  'get_subject_daily_attendance',
-  'get_registered_semesters',
-  'get_registered_subjects_and_faculties',
-  'get_semesters_for_exam_events',
-  'get_exam_events',
-  'get_exam_schedule',
-  'get_semesters_for_marks',
-  'download_marks',
-  'get_semesters_for_grade_card',
-  '__get_program_id',
-  'get_grade_card',
-  '__get_semester_number',
-  'get_sgpa_cgpa'
+  "get_personal_info",
+  "get_student_bank_info",
+  "change_password",
+  "get_attendance_meta",
+  "get_attendance",
+  "get_subject_daily_attendance",
+  "get_registered_semesters",
+  "get_registered_subjects_and_faculties",
+  "get_semesters_for_exam_events",
+  "get_exam_events",
+  "get_exam_schedule",
+  "get_semesters_for_marks",
+  "download_marks",
+  "get_semesters_for_grade_card",
+  "__get_program_id",
+  "get_grade_card",
+  "__get_semester_number",
+  "get_sgpa_cgpa",
 ];
 
-authenticatedMethods.forEach(methodName => {
+authenticatedMethods.forEach((methodName) => {
   WebPortal.prototype[methodName] = authenticated(WebPortal.prototype[methodName]);
 });
+
+export { WebPortal, WebPortalSession };

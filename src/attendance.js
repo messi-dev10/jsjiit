@@ -1,4 +1,7 @@
-class AttendanceHeader {
+/**
+ * @module Attendance
+ */
+export class AttendanceHeader {
   /**
    * Class which contains header info in the Attendance API
    * @param {string} branchdesc - Description of the branch
@@ -23,7 +26,7 @@ class AttendanceHeader {
   }
 }
 
-class Semester {
+export class Semester {
   /**
    * Class which contains Semester info
    * @param {string} registration_code - Registration code of the semester
@@ -44,7 +47,7 @@ class Semester {
   }
 }
 
-class AttendanceMeta {
+export class AttendanceMeta {
   /**
    * Class which contains metadata for Attendance
    * @param {object} resp - JSON response object with headers and semesters

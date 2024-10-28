@@ -1,4 +1,7 @@
-class RegisteredSubject {
+/**
+ * @module Registration
+ */
+export class RegisteredSubject {
   /**
    * Class containing registered subject info like Lecturer name, credits, etc
    * @param {string} employee_name - Name of the employee/lecturer
@@ -61,7 +64,7 @@ class RegisteredSubject {
   }
 }
 
-class Registrations {
+export class Registrations {
   /**
    * Class containing all registered subjects and total course credits for the semester
    * @param {object} resp - JSON response object with registrations and total credits

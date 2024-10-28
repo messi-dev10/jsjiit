@@ -1,4 +1,7 @@
-class ExamEvent {
+/**
+ * @module Exams
+ */
+export class ExamEvent {
   /**
    * Class containing exam event info
    * @param {string} exam_event_code - Code of the exam event
