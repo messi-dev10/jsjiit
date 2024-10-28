@@ -1,10 +1,5 @@
-let session;
-class APIError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = "APIError";
-  }
-}
+const API = "https://webportal.jiit.ac.in:6011/StudentPortalAPI";
+const DEFCAPTCHA = { captcha: "phw5n", hidden: "gmBctEffdSg=" };
 
 function authenticated(method) {
   /**
@@ -17,94 +12,6 @@ function authenticated(method) {
     }
     return method.apply(this, args);
   };
-}
-
-async function __hit(method, url, options = {}, passed_headers = {}) {
-  let exception = APIError; // Default exception
-
-  // If an exception is provided in options, use that
-  if (options.exception) {
-    exception = options.exception;
-    delete options.exception;
-  }
-
-  let headers;
-
-  // Check if authentication is required
-  if (options.authenticated) {
-    // console.log("headers needed");
-    headers = passed_headers;
-    delete options.authenticated;
-  } else {
-    let localname = await generateLocalName();
-    headers = { LocalName: localname };
-  }
-
-  // Merge provided headers with default headers
-  if (options.headers) {
-    options.headers = { ...options.headers, ...headers };
-  } else {
-    options.headers = headers;
-  }
-
-  let fetchOptions = {
-    method: method,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  };
-
-  if (options.json) {
-    fetchOptions.body = JSON.stringify(options.json);
-  } else {
-    fetchOptions.body = options.body;
-  }
-
-  // console.log(fetchOptions);
-
-  try {
-    // Make the request using fetch
-    console.log("fetching", url, "with options", fetchOptions);
-    const response = await fetch(url, fetchOptions);
-
-    // Convert the response to JSON
-    const resp = await response.json();
-
-    // Check for successful response status
-    if (resp.status && resp.status.responseStatus !== "Success") {
-      throw new exception(`status:\n${JSON.stringify(resp.status, null, 2)}`);
-    }
-    // console.log(resp);
-    return resp;
-  } catch (error) {
-    // Handle error
-    throw new exception(error.message || "Unknown error");
-  }
-}
-
-const API = "https://webportal.jiit.ac.in:6011/StudentPortalAPI";
-
-const DEFCAPTCHA = { captcha: "phw5n", hidden: "gmBctEffdSg=" };
-
-async function student_login(username, password, captcha = DEFCAPTCHA) {
-  let pretoken_endpoint = "/token/pretoken-check";
-  let token_endpoint = "/token/generate-token1";
-
-  let payload = { username: username, usertype: "S", captcha: captcha };
-  payload = await serializePayload(payload);
-
-  let resp = await __hit("POST", API + pretoken_endpoint, { body: payload });
-
-  let payload2 = resp["response"];
-  delete payload2["rejectedData"];
-  payload2["Modulename"] = "STUDENTMODULE";
-  payload2["passwordotpvalue"] = password;
-  payload2 = await serializePayload(payload2);
-
-  const resp2 = await __hit("POST", API + token_endpoint, { body: payload2 });
-  session = new WebPortalSession(resp2["response"]);
-  return session;
 }
 
 class WebPortalSession {
@@ -128,7 +35,8 @@ class WebPortalSession {
     this.enrollmentno = this.regdata["enrollmentno"];
   }
 
-  getHeaders(localname) {
+  async get_headers() {
+    const localname = await generate_local_name();
     return {
       Authorization: `Bearer ${this.token}`,
       LocalName: localname,
@@ -136,304 +44,308 @@ class WebPortalSession {
   }
 }
 
-async function get_personal_info() {
-  const ENDPOINT = "/studentpersinfo/getstudent-personalinformation";
-  const payload = {
-    clinetid: "SOAU",
-    instituteid: session.instituteid,
-  };
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
-  return resp["response"];
-}
-
-async function get_attendance_meta(username, password) {
-  ENDPOINT = "/StudentClassAttendance/getstudentInforegistrationforattendence";
-
-  payload = {
-    clientid: session.clientid,
-    instituteid: session.instituteid,
-    membertype: session.membertype,
-  };
-
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
-  // console.log("attendance meta");
-  // console.log(resp);
-
-  return new AttendanceMeta(resp["response"]);
-}
-
-async function get_attendance(header, semester) {
-  const ENDPOINT = "/StudentClassAttendance/getstudentattendancedetail";
-
-  const payload = {
-    clientid: session.clientid,
-    instituteid: session.instituteid,
-    registrationcode: semester.registration_code,
-    registrationid: semester.registration_id,
-    stynumber: header.stynumber,
-  };
-  // console.log("payload")
-  // console.log(payload);
-
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
-    return resp["response"];
-  } catch (error) {
-    throw new APIError(error);
+class WebPortal {
+  constructor() {
+    this.session = null;
   }
-}
+  async __hit(method, url, options = {}) {
+    let exception = APIError; // Default exception
+    if (options.exception) {
+      exception = options.exception;
+      delete options.exception;
+    }
 
-async function get_subject_daily_attendance(
-  attendance,
-  semester,
-  subjectid,
-  individualsubjectcode,
-  subjectcomponentids
-) {
-  const ENDPOINT = "/StudentClassAttendance/getstudentsubjectpersentage";
-  const payload = {
-    cmpidkey: subjectcomponentids.map((id) => ({ subjectcomponentid: id })),
-    clientid: session.clientid,
-    instituteid: session.instituteid,
-    registrationcode: semester.registration_code,
-    registrationid: semester.registration_id,
-    subjectcode: individualsubjectcode,
-    subjectid: subjectid,
-  };
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
-    return resp["response"];
-  } catch (error) {
-    throw new APIError(error);
+    let header;
+
+    if (options.authenticated) {
+      header = await this.session.get_headers(); // Assumes calling method is authenticated
+      delete options.authenticated;
+    } else {
+      let localname = await generate_local_name();
+      header = { LocalName: localname };
+    }
+
+    if (options.headers) {
+      options.headers = { ...options.headers, ...header };
+    } else {
+      options.headers = header;
+    }
+
+    let fetchOptions = {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    };
+
+    if (options.json) {
+      fetchOptions.body = JSON.stringify(options.json);
+    } else {
+      fetchOptions.body = options.body;
+    }
+    try {
+      console.log("fetching", url, "with options", fetchOptions);
+      const response = await fetch(url, fetchOptions);
+      const resp = await response.json();
+
+      if (resp.status && resp.status.responseStatus !== "Success") {
+        throw new exception(`status:\n${JSON.stringify(resp.status, null, 2)}`);
+      }
+      return resp;
+    } catch (error) {
+      throw new exception(error.message || "Unknown error");
+    }
   }
-}
 
-async function get_registered_semesters() {
-  const ENDPOINT = "/reqsubfaculty/getregistrationList";
+  async student_login(username, password, captcha = DEFCAPTCHA) {
+    let pretoken_endpoint = "/token/pretoken-check";
+    let token_endpoint = "/token/generate-token1";
 
-  const payload = {
-    instituteid: session.instituteid,
-    studentid: session.memberid,
-  };
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
+    let payload = { username: username, usertype: "S", captcha: captcha };
+    payload = await serialize_payload(payload);
+
+    let resp = await this.__hit("POST", API + pretoken_endpoint, { body: payload, exception: LoginError });
+
+    let payload2 = resp["response"];
+    delete payload2["rejectedData"];
+    payload2["Modulename"] = "STUDENTMODULE";
+    payload2["passwordotpvalue"] = password;
+    payload2 = await serialize_payload(payload2);
+
+    const resp2 = await this.__hit("POST", API + token_endpoint, { body: payload2, exception: LoginError });
+    this.session = new WebPortalSession(resp2["response"]);
+    return this.session;
+  }
+
+  async get_personal_info() {
+    const ENDPOINT = "/studentpersinfo/getstudent-personalinformation";
+    const payload = {
+      clinetid: "SOAU",
+      instituteid: this.session.instituteid,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
+    return resp["response"];
+  }
+
+  async get_student_bank_info() {
+    const ENDPOINT = "/studentbankdetails/getstudentbankinfo";
+    const payload = {
+      instituteid: this.session.instituteid,
+      studentid: this.session.memberid,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
+    return resp["response"];
+  }
+
+  async change_password(old_password, new_password) {
+    const ENDPOINT = "/clxuser/changepassword";
+    const payload = {
+      membertype: this.session.membertype,
+      oldpassword: old_password,
+      newpassword: new_password,
+      confirmpassword: new_password,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true, exception: AccountAPIError });
+    return resp["response"];
+  }
+
+  async get_attendance_meta() {
+    const ENDPOINT = "/StudentClassAttendance/getstudentInforegistrationforattendence";
+
+    const payload = {
+      clientid: this.session.clientid,
+      instituteid: this.session.instituteid,
+      membertype: this.session.membertype,
+    };
+
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
+    return new AttendanceMeta(resp["response"]);
+  }
+
+  async get_attendance(header, semester) {
+    const ENDPOINT = "/StudentClassAttendance/getstudentattendancedetail";
+
+    const payload = {
+      clientid: this.session.clientid,
+      instituteid: this.session.instituteid,
+      registrationcode: semester.registration_code,
+      registrationid: semester.registration_id,
+      stynumber: header.stynumber,
+    };
+
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
+    return resp["response"];
+  }
+
+  async get_subject_daily_attendance(semester, subjectid, individualsubjectcode, subjectcomponentids) {
+    const ENDPOINT = "/StudentClassAttendance/getstudentsubjectpersentage";
+    const payload = {
+      cmpidkey: subjectcomponentids.map((id) => ({ subjectcomponentid: id })),
+      clientid: this.session.clientid,
+      instituteid: this.session.instituteid,
+      registrationcode: semester.registration_code,
+      registrationid: semester.registration_id,
+      subjectcode: individualsubjectcode,
+      subjectid: subjectid,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
+    return resp["response"];
+  }
+
+  async get_registered_semesters() {
+    const ENDPOINT = "/reqsubfaculty/getregistrationList";
+
+    const payload = {
+      instituteid: this.session.instituteid,
+      studentid: this.session.memberid,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"]["registrations"].map((i) => Semester.from_json(i));
-  } catch (error) {
-    throw new APIError(error);
   }
-}
 
-async function get_registered_subjects_and_faculties(semester) {
-  const ENDPOINT = "/reqsubfaculty/getfaculties";
-  const payload = {
-    instituteid: session.instituteid,
-    studentid: session.memberid,
-    registrationid: semester.registration_id,
-  };
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
+  async get_registered_subjects_and_faculties(semester) {
+    const ENDPOINT = "/reqsubfaculty/getfaculties";
+    const payload = {
+      instituteid: this.session.instituteid,
+      studentid: this.session.memberid,
+      registrationid: semester.registration_id,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return new Registrations(resp["response"]);
-  } catch (error) {
-    throw new APIError(error);
   }
-}
 
-async function get_semesters_for_exam_events() {
-  //first, get the semesters that have exam events
-  const ENDPOINT = "/studentcommonsontroller/getsemestercode-withstudentexamevents";
-  const payload = {
-    clientid: session.clientid,
-    instituteid: session.instituteid,
-    memberid: session.memberid,
-  };
-  studentcommonsontroller / getsemestercode - exammarks;
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
+  async get_semesters_for_exam_events() {
+    //first, get the semesters that have exam events
+    const ENDPOINT = "/studentcommonsontroller/getsemestercode-withstudentexamevents";
+    const payload = {
+      clientid: this.session.clientid,
+      instituteid: this.session.instituteid,
+      memberid: this.session.memberid,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"]["semesterCodeinfo"]["semestercode"].map((i) => Semester.from_json(i));
-  } catch (error) {
-    throw new APIError(error);
   }
-}
 
-async function get_exam_events(semester) {
-  //then, get the exam events for the semester
-  const ENDPOINT = "/studentcommonsontroller/getstudentexamevents";
-  const payload = {
-    instituteid: session.instituteid,
-    registationid: semester.registration_id, // not a typo
-  };
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
+  async get_exam_events(semester) {
+    //then, get the exam events for the semester
+    const ENDPOINT = "/studentcommonsontroller/getstudentexamevents";
+    const payload = {
+      instituteid: this.session.instituteid,
+      registationid: semester.registration_id, // not a typo
+    };
+
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"]["eventcode"]["examevent"].map((i) => ExamEvent.from_json(i));
-  } catch (error) {
-    throw new APIError(error);
   }
-}
 
-async function get_exam_schedule(exam_event) {
-  //then, get the exam schedule for the exam event
-  const ENDPOINT = "/studentsttattview/getstudent-examschedule";
-  const payload = {
-    instituteid: session.instituteid,
-    registrationid: exam_event.registration_id,
-    exameventid: exam_event.exam_event_id,
-  };
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
+  async get_exam_schedule(exam_event) {
+    //then, get the exam schedule for the exam event
+    const ENDPOINT = "/studentsttattview/getstudent-examschedule";
+    const payload = {
+      instituteid: this.session.instituteid,
+      registrationid: exam_event.registration_id,
+      exameventid: exam_event.exam_event_id,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"];
-  } catch (error) {
-    throw new APIError(error);
   }
-}
 
-async function get_semesters_for_marks() {
-  const ENDPOINT = "/studentcommonsontroller/getsemestercode-exammarks";
-  const payload = {
-    instituteid: session.instituteid,
-    studentid: session.memberid,
-  };
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
+  async get_semesters_for_marks() {
+    const ENDPOINT = "/studentcommonsontroller/getsemestercode-exammarks";
+    const payload = {
+      instituteid: this.session.instituteid,
+      studentid: this.session.memberid,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"]["semestercode"].map((i) => Semester.from_json(i));
-  } catch (error) {
-    throw new APIError(error);
   }
-}
 
-async function download_marks(semester) {
-  const ENDPOINT =
-    "/studentsexamview/printstudent-exammarks/" +
-    session.memberid +
-    "/" +
-    session.instituteid +
-    "/" +
-    semester.registration_id +
-    "/" +
-    semester.registration_code;
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  const fetchOptions = {
-    method: "GET",
-    headers: _headers,
-  };
+  async download_marks(semester) {
+    const ENDPOINT =
+      "/studentsexamview/printstudent-exammarks/" +
+      this.session.memberid +
+      "/" +
+      this.session.instituteid +
+      "/" +
+      semester.registration_id +
+      "/" +
+      semester.registration_code;
+    const localname = await generate_local_name();
+    let _headers = await this.session.get_headers(localname);
+    const fetchOptions = {
+      method: "GET",
+      headers: _headers,
+    };
 
-  try {
-    const resp = await fetch(API + ENDPOINT, fetchOptions);
-    const blob = await resp.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `marks_${semester.registration_code}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    a.remove();
-  } catch (error) {
-    throw new APIError(error);
+    try {
+      const resp = await fetch(API + ENDPOINT, fetchOptions);
+      const blob = await resp.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `marks_${semester.registration_code}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (error) {
+      throw new APIError(error);
+    }
   }
-}
 
-async function get_semesters_for_grade_card() {
-  const ENDPOINT = "/studentgradecard/getregistrationList";
-  const payload = {
-    instituteid: session.instituteid,
-  };
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
+  async get_semesters_for_grade_card() {
+    const ENDPOINT = "/studentgradecard/getregistrationList";
+    const payload = {
+      instituteid: this.session.instituteid,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"]["registrations"].map((i) => Semester.from_json(i));
-  } catch (error) {
-    throw new APIError(error);
   }
-}
 
-async function get_program_id() {
-  const ENDPOINT = "/studentgradecard/getstudentinfo";
-  const payload = {
-    instituteid: session.instituteid,
-  };
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
+  async __get_program_id() {
+    const ENDPOINT = "/studentgradecard/getstudentinfo";
+    const payload = {
+      instituteid: this.session.instituteid,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"]["programid"];
-  } catch (error) {
-    throw new APIError(error);
   }
-}
 
-async function get_grade_card(semester) {
-  const programid = await get_program_id();
-  const ENDPOINT = "/studentgradecard/showstudentgradecard";
-  const payload = {
-    branchid: session.branch_id,
-    instituteid: session.instituteid,
-    programid: programid,
-    registrationid: semester.registration_id,
-  };
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
+  async get_grade_card(semester) {
+    const programid = await this.__get_program_id();
+    const ENDPOINT = "/studentgradecard/showstudentgradecard";
+    const payload = {
+      branchid: this.session.branch_id,
+      instituteid: this.session.instituteid,
+      programid: programid,
+      registrationid: semester.registration_id,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"];
-  } catch (error) {
-    throw new APIError(error);
   }
-}
 
-async function get_semester_number() {
-  const ENDPOINT = "/studentsgpacgpa/checkIfstudentmasterexist";
-  const payload = {
-    instituteid: session.instituteid,
-    studentid: session.memberid,
-    name: session.name,
-    enrollmentno: session.enrollmentno,
-  };
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
+  async __get_semester_number() {
+    const ENDPOINT = "/studentsgpacgpa/checkIfstudentmasterexist";
+    const payload = {
+      instituteid: this.session.instituteid,
+      studentid: this.session.memberid,
+      name: this.session.name,
+      enrollmentno: this.session.enrollmentno,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"]["studentlov"]["currentsemester"];
-  } catch (error) {
-    throw new APIError(error);
   }
-}
 
-async function get_sgpa_cgpa() {
-  const ENDPOINT = "/studentsgpacgpa/getallsemesterdata";
-  const stynumber = await get_semester_number();
-  const payload = {
-    instituteid: session.instituteid,
-    studentid: session.memberid,
-    stynumber: stynumber,
-  };
-  const localname = await generateLocalName();
-  let _headers = session.getHeaders(localname);
-  try {
-    const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
+  async get_sgpa_cgpa() {
+    const ENDPOINT = "/studentsgpacgpa/getallsemesterdata";
+    const stynumber = await this.__get_semester_number();
+    const payload = {
+      instituteid: this.session.instituteid,
+      studentid: this.session.memberid,
+      stynumber: stynumber,
+    };
+    const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"];
-  } catch (error) {
-    throw new APIError(error);
   }
 }

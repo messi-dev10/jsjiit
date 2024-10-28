@@ -25,57 +25,59 @@
     async function main() {
       let user = document.getElementById("user");
       let pass = document.getElementById("pass");
-      await student_login(user.value, pass.value);
+      let w = new WebPortal();
+      await w.student_login(user.value, pass.value);
 
-      // const meta = await get_attendance_meta(user.value, pass.value)
-      // let sem = meta.latestSemester();
-      // let header = meta.latestHeader();
-      // console.log("Latest semester:", sem);
-      // console.log("Latest header:", header);
-      // let attendance = await get_attendance(header, sem);
-      // console.log(attendance);
-      // // code to get the subject attendance
-      // let subjectIndex = attendance["studentattendancelist"].length - 1;
-      // let subjectid = attendance["studentattendancelist"][subjectIndex]["subjectid"];
-      // let individualsubjectcode = attendance["studentattendancelist"][subjectIndex]["individualsubjectcode"];
-      // const possibleComponentCodes = ["Lsubjectcomponentid", "Psubjectcomponentid", "Tsubjectcomponentid"]
-      // let subjectcomponentids = [];
-      // for (let possibleComponentCode of possibleComponentCodes) {
-      //   if (attendance["studentattendancelist"][subjectIndex][possibleComponentCode]) {
-      //     subjectcomponentids.push(attendance["studentattendancelist"][subjectIndex][possibleComponentCode]);
-      //   }
-      // }
-      // let subjectAttendance = await get_subject_daily_attendance(attendance, sem, subjectid, individualsubjectcode, subjectcomponentids);
-      // console.log(subjectAttendance);
+      const meta = await w.get_attendance_meta()
+      let sem = meta.latestSemester();
+      let header = meta.latestHeader();
+      console.log("Latest semester:", sem);
+      console.log("Latest header:", header);
+      let attendance = await w.get_attendance(header, sem);
+      console.log(attendance);
 
-      // let registerdSems = await get_registered_semesters();
-      // const latestSem = registerdSems[0];
-      // let registeredSubjects = await get_registered_subjects_and_faculties(latestSem);
+      // code to get the subject attendance
+      let subjectIndex = 1;
+      let subjectid = attendance["studentattendancelist"][subjectIndex]["subjectid"];
+      let individualsubjectcode = attendance["studentattendancelist"][subjectIndex]["individualsubjectcode"];
+      const possibleComponentCodes = ["Lsubjectcomponentid", "Psubjectcomponentid", "Tsubjectcomponentid"]
+      let subjectcomponentids = [];
+      for (let possibleComponentCode of possibleComponentCodes) {
+        if (attendance["studentattendancelist"][subjectIndex][possibleComponentCode]) {
+          subjectcomponentids.push(attendance["studentattendancelist"][subjectIndex][possibleComponentCode]);
+        }
+      }
+      let subjectAttendance = await w.get_subject_daily_attendance(sem, subjectid, individualsubjectcode, subjectcomponentids);
+      console.log(subjectAttendance);
+
+      // let registerdSems = await w.get_registered_semesters();
+      // let latestSem = registerdSems[0];
+      // let registeredSubjects = await w.get_registered_subjects_and_faculties(latestSem);
       // console.log(registeredSubjects);
 
-      // let examSems = await get_semesters_for_exam_events();
-      // let latestSem = examSems[0];
-      // let examEvents = await get_exam_events(latestSem);
+      // let examSems = await w.get_semesters_for_exam_events();
+      // latestSem = examSems[0];
+      // let examEvents = await w.get_exam_events(latestSem);
       // console.log(examEvents);
-      // let examSchedule = await get_exam_schedule(examEvents[0]);
+      // let examSchedule = await w.get_exam_schedule(examEvents[0]);
       // console.log(examSchedule);
 
 
-      // let gradeCardSems = await get_semesters_for_grade_card();
+      // let gradeCardSems = await w.get_semesters_for_grade_card();
       // console.log(gradeCardSems);
-      // let gradeCard = await get_grade_card(gradeCardSems[0]);
+      // let gradeCard = await w.get_grade_card(gradeCardSems[0]);
       // console.log(gradeCard);
 
-      // let sgpaCgpa = await get_sgpa_cgpa();
+      // let sgpaCgpa = await w.get_sgpa_cgpa();
       // console.log(sgpaCgpa);
 
-      // let personalInfo = await get_personal_info();
+      // let personalInfo = await w.get_personal_info();
       // console.log(personalInfo);
 
-      let marksSems = await get_semesters_for_marks();
-      let latestSem = marksSems[0];
-      let marks = await download_marks(latestSem);
-      console.log(marks);
+      // let marksSems = await w.get_semesters_for_marks();
+      // latestSem = marksSems[0];
+      // let marks = await w.download_marks(latestSem);
+      // console.log(marks);
 
     }
   </script>
