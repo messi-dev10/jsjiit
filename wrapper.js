@@ -1,7 +1,32 @@
+/**
+ * Base API endpoint for the JIIT web portal
+ * @constant {string}
+ */
 const API = "https://webportal.jiit.ac.in:6011/StudentPortalAPI";
+
+/**
+ * Default CAPTCHA values used for login
+ * @constant {{captcha: string, hidden: string}}
+ */
 const DEFCAPTCHA = { captcha: "phw5n", hidden: "gmBctEffdSg=" };
 
+/**
+ * Class representing a session with the web portal
+ */
 class WebPortalSession {
+  /**
+   * Creates a WebPortalSession instance from API response
+   * @param {Object} resp - Response object from login API
+   * @param {Object} resp.regdata - Registration data containing user details
+   * @param {Array} resp.regdata.institutelist - List of institutes user has access to
+   * @param {string} resp.regdata.memberid - Member ID of the user
+   * @param {string} resp.regdata.userid - User ID
+   * @param {string} resp.regdata.token - Token for authentication
+   * @param {string} resp.regdata.clientid - Client ID
+   * @param {string} resp.regdata.membertype - Type of member
+   * @param {string} resp.regdata.name - Name of the user
+   * @param {string} resp.regdata.enrollmentno - Enrollment number
+   */
   constructor(resp) {
     this.raw_response = resp;
     this.regdata = resp["regdata"];
@@ -22,6 +47,10 @@ class WebPortalSession {
     this.enrollmentno = this.regdata["enrollmentno"];
   }
 
+  /**
+   * Generates authentication headers for API requests
+   * @returns {Promise<Object>} Headers object containing Authorization and LocalName
+   */
   async get_headers() {
     const localname = await generate_local_name();
     return {
@@ -31,10 +60,31 @@ class WebPortalSession {
   }
 }
 
+/**
+ * Main class for interacting with the JIIT web portal API
+ */
 class WebPortal {
+  /**
+   * Creates a WebPortal instance
+   */
   constructor() {
     this.session = null;
   }
+
+  /**
+   * Internal method to make HTTP requests to the API
+   * @private
+   * @param {string} method - HTTP method (GET, POST etc)
+   * @param {string} url - API endpoint URL
+   * @param {Object} [options={}] - Request options
+   * @param {Object} [options.headers] - Additional headers
+   * @param {Object} [options.json] - JSON payload
+   * @param {string} [options.body] - Raw body payload
+   * @param {boolean} [options.authenticated] - Whether request needs authentication
+   * @param {Error} [options.exception] - Custom error class to throw
+   * @returns {Promise<Object>} API response
+   * @throws {APIError} On API or network errors
+   */
   async __hit(method, url, options = {}) {
     let exception = APIError; // Default exception
     if (options.exception) {
@@ -43,7 +93,6 @@ class WebPortal {
     }
 
     let header;
-
     if (options.authenticated) {
       header = await this.session.get_headers(); // Assumes calling method is authenticated
       delete options.authenticated;
@@ -85,6 +134,14 @@ class WebPortal {
     }
   }
 
+  /**
+   * Logs in a student user
+   * @param {string} username - Student username
+   * @param {string} password - Student password
+   * @param {{captcha: string, hidden: string}} [captcha=DEFCAPTCHA] - CAPTCHA
+   * @returns {Promise<WebPortalSession>} New session instance
+   * @throws {LoginError} On login failure
+   */
   async student_login(username, password, captcha = DEFCAPTCHA) {
     let pretoken_endpoint = "/token/pretoken-check";
     let token_endpoint = "/token/generate-token1";
@@ -105,6 +162,10 @@ class WebPortal {
     return this.session;
   }
 
+  /**
+   * Gets personal information of logged in student
+   * @returns {Promise<Object>} Student personal information
+   */
   async get_personal_info() {
     const ENDPOINT = "/studentpersinfo/getstudent-personalinformation";
     const payload = {
@@ -115,6 +176,10 @@ class WebPortal {
     return resp["response"];
   }
 
+  /**
+   * Gets bank account information of logged in student
+   * @returns {Promise<Object>} Student bank information
+   */
   async get_student_bank_info() {
     const ENDPOINT = "/studentbankdetails/getstudentbankinfo";
     const payload = {
@@ -125,6 +190,13 @@ class WebPortal {
     return resp["response"];
   }
 
+  /**
+   * Changes password for logged in student
+   * @param {string} old_password - Current password
+   * @param {string} new_password - New password
+   * @returns {Promise<Object>} Response indicating success/failure
+   * @throws {AccountAPIError} On password change failure
+   */
   async change_password(old_password, new_password) {
     const ENDPOINT = "/clxuser/changepassword";
     const payload = {
@@ -137,6 +209,10 @@ class WebPortal {
     return resp["response"];
   }
 
+  /**
+   * Gets attendance metadata including headers and semesters
+   * @returns {Promise<AttendanceMeta>} Attendance metadata
+   */
   async get_attendance_meta() {
     const ENDPOINT = "/StudentClassAttendance/getstudentInforegistrationforattendence";
 
@@ -150,6 +226,12 @@ class WebPortal {
     return new AttendanceMeta(resp["response"]);
   }
 
+  /**
+   * Gets attendance details for a semester
+   * @param {AttendanceHeader} header - Attendance header
+   * @param {Semester} semester - Semester object
+   * @returns {Promise<Object>} Attendance details
+   */
   async get_attendance(header, semester) {
     const ENDPOINT = "/StudentClassAttendance/getstudentattendancedetail";
 
@@ -165,6 +247,14 @@ class WebPortal {
     return resp["response"];
   }
 
+  /**
+   * Gets attendance for every class of the subject for the semester.
+   * @param {Semester} semester - Semester object
+   * @param {string} subjectid - Subject ID
+   * @param {string} individualsubjectcode - Individual subject code
+   * @param {Array<string>} subjectcomponentids - Array of subject component IDs
+   * @returns {Promise<Object>} Subject attendance details
+   */
   async get_subject_daily_attendance(semester, subjectid, individualsubjectcode, subjectcomponentids) {
     const ENDPOINT = "/StudentClassAttendance/getstudentsubjectpersentage";
     const payload = {
@@ -180,6 +270,10 @@ class WebPortal {
     return resp["response"];
   }
 
+  /**
+   * Gets list of registered semesters
+   * @returns {Promise<Array<Semester>>} Array of semester objects
+   */
   async get_registered_semesters() {
     const ENDPOINT = "/reqsubfaculty/getregistrationList";
 
@@ -191,6 +285,11 @@ class WebPortal {
     return resp["response"]["registrations"].map((i) => Semester.from_json(i));
   }
 
+  /**
+   * Gets registered subjects and faculty details for a semester
+   * @param {Semester} semester - Semester object
+   * @returns {Promise<Registrations>} Registration details
+   */
   async get_registered_subjects_and_faculties(semester) {
     const ENDPOINT = "/reqsubfaculty/getfaculties";
     const payload = {
@@ -202,8 +301,11 @@ class WebPortal {
     return new Registrations(resp["response"]);
   }
 
+  /**
+   * Gets semesters that have exam events
+   * @returns {Promise<Array<Semester>>} Array of semester objects
+   */
   async get_semesters_for_exam_events() {
-    //first, get the semesters that have exam events
     const ENDPOINT = "/studentcommonsontroller/getsemestercode-withstudentexamevents";
     const payload = {
       clientid: this.session.clientid,
@@ -214,8 +316,12 @@ class WebPortal {
     return resp["response"]["semesterCodeinfo"]["semestercode"].map((i) => Semester.from_json(i));
   }
 
+  /**
+   * Gets exam events for a semester
+   * @param {Semester} semester - Semester object
+   * @returns {Promise<Array<ExamEvent>>} Array of exam event objects
+   */
   async get_exam_events(semester) {
-    //then, get the exam events for the semester
     const ENDPOINT = "/studentcommonsontroller/getstudentexamevents";
     const payload = {
       instituteid: this.session.instituteid,
@@ -226,8 +332,12 @@ class WebPortal {
     return resp["response"]["eventcode"]["examevent"].map((i) => ExamEvent.from_json(i));
   }
 
+  /**
+   * Gets exam schedule for an exam event
+   * @param {ExamEvent} exam_event - Exam event object
+   * @returns {Promise<Object>} Exam schedule details
+   */
   async get_exam_schedule(exam_event) {
-    //then, get the exam schedule for the exam event
     const ENDPOINT = "/studentsttattview/getstudent-examschedule";
     const payload = {
       instituteid: this.session.instituteid,
@@ -238,6 +348,10 @@ class WebPortal {
     return resp["response"];
   }
 
+  /**
+   * Gets semesters that have marks available
+   * @returns {Promise<Array<Semester>>} Array of semester objects
+   */
   async get_semesters_for_marks() {
     const ENDPOINT = "/studentcommonsontroller/getsemestercode-exammarks";
     const payload = {
@@ -248,6 +362,11 @@ class WebPortal {
     return resp["response"]["semestercode"].map((i) => Semester.from_json(i));
   }
 
+  /**
+   * Downloads marks PDF for a semester
+   * @param {Semester} semester - Semester object
+   * @throws {APIError} On download failure
+   */
   async download_marks(semester) {
     const ENDPOINT =
       "/studentsexamview/printstudent-exammarks/" +
@@ -281,6 +400,10 @@ class WebPortal {
     }
   }
 
+  /**
+   * Gets semesters that have grade cards available
+   * @returns {Promise<Array<Semester>>} Array of semester objects
+   */
   async get_semesters_for_grade_card() {
     const ENDPOINT = "/studentgradecard/getregistrationList";
     const payload = {
@@ -290,6 +413,11 @@ class WebPortal {
     return resp["response"]["registrations"].map((i) => Semester.from_json(i));
   }
 
+  /**
+   * Gets program ID for grade card
+   * @private
+   * @returns {Promise<string>} Program ID
+   */
   async __get_program_id() {
     const ENDPOINT = "/studentgradecard/getstudentinfo";
     const payload = {
@@ -299,6 +427,11 @@ class WebPortal {
     return resp["response"]["programid"];
   }
 
+  /**
+   * Gets grade card for a semester
+   * @param {Semester} semester - Semester object
+   * @returns {Promise<Object>} Grade card details
+   */
   async get_grade_card(semester) {
     const programid = await this.__get_program_id();
     const ENDPOINT = "/studentgradecard/showstudentgradecard";
@@ -312,6 +445,11 @@ class WebPortal {
     return resp["response"];
   }
 
+  /**
+   * Gets current semester number
+   * @private
+   * @returns {Promise<number>} Current semester number
+   */
   async __get_semester_number() {
     const ENDPOINT = "/studentsgpacgpa/checkIfstudentmasterexist";
     const payload = {
@@ -324,6 +462,10 @@ class WebPortal {
     return resp["response"]["studentlov"]["currentsemester"];
   }
 
+  /**
+   * Gets SGPA and CGPA details
+   * @returns {Promise<Object>} SGPA and CGPA details
+   */
   async get_sgpa_cgpa() {
     const ENDPOINT = "/studentsgpacgpa/getallsemesterdata";
     const stynumber = await this.__get_semester_number();
@@ -337,12 +479,13 @@ class WebPortal {
   }
 }
 
-
+/**
+ * Decorator that checks if user is authenticated before executing method
+ * @param {Function} method - Method to decorate
+ * @returns {Function} Decorated method that checks authentication
+ * @throws {NotLoggedIn} If user is not logged in
+ */
 function authenticated(method) {
-  /**
-   * @param {Function} method - A method of WebPortal class
-   * @returns {Function} - A wrapper for the method with session validation checks
-   */
   return function (...args) {
     if (this.session == null) {
       throw new NotLoggedIn();
@@ -351,6 +494,10 @@ function authenticated(method) {
   };
 }
 
+/**
+ * List of methods that require authentication
+ * @constant {Array<string>}
+ */
 const authenticatedMethods = [
   'get_personal_info',
   'get_student_bank_info',
