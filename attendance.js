@@ -18,7 +18,7 @@ class AttendanceHeader {
    * @param {object} resp - JSON object representing AttendanceHeader
    * @returns {AttendanceHeader} A new AttendanceHeader instance
    */
-  static fromJson(resp) {
+  static from_json(resp) {
     return new AttendanceHeader(resp.branchdesc, resp.name, resp.programdesc, resp.stynumber);
   }
 }
@@ -39,7 +39,7 @@ class Semester {
    * @param {object} resp - JSON object representing Semester
    * @returns {Semester} A new Semester instance
    */
-  static fromJson(resp) {
+  static from_json(resp) {
     return new Semester(resp.registrationcode, resp.registrationid);
   }
 }
@@ -51,8 +51,8 @@ class AttendanceMeta {
    */
   constructor(resp) {
     this.raw_response = resp;
-    this.headers = resp.headerlist.map(AttendanceHeader.fromJson);
-    this.semesters = resp.semlist.map(Semester.fromJson);
+    this.headers = resp.headerlist.map(AttendanceHeader.from_json);
+    this.semesters = resp.semlist.map(Semester.from_json);
   }
 
   /**

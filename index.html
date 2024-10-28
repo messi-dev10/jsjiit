@@ -1,40 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
-    <!-- <link href="css/style.css" rel="stylesheet"> -->
-  </head>
-  <body>
-    <label for="user">Username</label>
-    <input id="user" name="user" type="text"></input>
-    <label for="pass">Password</label>
-    <input id="pass" name="pass" type="text"></input>
-    <button onclick="signin();">Submit</button>
 
-    <script src="utils.js"></script>
-    <script src="encryption.js"></script>
-    <script src="wrapper.js"></script>
-    <script src="attendance.js"></script>
-    <script>
-      function signin(){
-        let user = document.getElementById("user");
-        let pass = document.getElementById("pass");
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <!-- <link href="css/style.css" rel="stylesheet"> -->
+</head>
 
-        get_attendance_meta(user.value, pass.value).then(meta => {
-          let sem = meta.latestSemester();
-          let header = meta.latestHeader();
-          console.log("Latest semester:", sem);
-          console.log("Latest header:", header);
-          return get_attendance(header, sem);
-        }).then(attendance => {
-          console.log("xxxxxx")
-          console.log(attendance);
-        }).catch(error => {
-          console.error("Error fetching attendance:", error);
-        });
-      }
-    </script>
+<body>
+  <label for="user">Username</label>
+  <input id="user" name="user" type="text"></input>
+  <label for="pass">Password</label>
+  <input id="pass" name="pass" type="text"></input>
+  <button onclick="main();">Submit</button>
+
+  <script src="utils.js"></script>
+  <script src="encryption.js"></script>
+  <script src="wrapper.js"></script>
+  <script src="attendance.js"></script>
+  <script src="registration.js"></script>
+  <script src="exam.js"></script>
+  <script>
+    async function main() {
+      let user = document.getElementById("user");
+      let pass = document.getElementById("pass");
+      await student_login(user.value, pass.value);
+
+      // const meta = await get_attendance_meta(user.value, pass.value)
+      // let sem = meta.latestSemester();
+      // let header = meta.latestHeader();
+      // console.log("Latest semester:", sem);
+      // console.log("Latest header:", header);
+      // let attendance = await get_attendance(header, sem);
+      // console.log(attendance);
+      // // code to get the subject attendance
+      // let subjectIndex = attendance["studentattendancelist"].length - 1;
+      // let subjectid = attendance["studentattendancelist"][subjectIndex]["subjectid"];
+      // let individualsubjectcode = attendance["studentattendancelist"][subjectIndex]["individualsubjectcode"];
+      // const possibleComponentCodes = ["Lsubjectcomponentid", "Psubjectcomponentid", "Tsubjectcomponentid"]
+      // let subjectcomponentids = [];
+      // for (let possibleComponentCode of possibleComponentCodes) {
+      //   if (attendance["studentattendancelist"][subjectIndex][possibleComponentCode]) {
+      //     subjectcomponentids.push(attendance["studentattendancelist"][subjectIndex][possibleComponentCode]);
+      //   }
+      // }
+      // let subjectAttendance = await get_subject_daily_attendance(attendance, sem, subjectid, individualsubjectcode, subjectcomponentids);
+      // console.log(subjectAttendance);
+
+      // let registerdSems = await get_registered_semesters();
+      // const latestSem = registerdSems[0];
+      // let registeredSubjects = await get_registered_subjects_and_faculties(latestSem);
+      // console.log(registeredSubjects);
+
+      // let examSems = await get_semesters_for_exam_events();
+      // let latestSem = examSems[0];
+      // let examEvents = await get_exam_events(latestSem);
+      // console.log(examEvents);
+      // let examSchedule = await get_exam_schedule(examEvents[0]);
+      // console.log(examSchedule);
+
+
+      // let gradeCardSems = await get_semesters_for_grade_card();
+      // console.log(gradeCardSems);
+      // let gradeCard = await get_grade_card(gradeCardSems[0]);
+      // console.log(gradeCard);
+
+      // let sgpaCgpa = await get_sgpa_cgpa();
+      // console.log(sgpaCgpa);
+
+      // let personalInfo = await get_personal_info();
+      // console.log(personalInfo);
+
+      let marksSems = await get_semesters_for_marks();
+      let latestSem = marksSems[0];
+      let marks = await download_marks(latestSem);
+      console.log(marks);
+
+    }
+  </script>
 </body>
+
 </html>
