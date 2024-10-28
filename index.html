@@ -21,6 +21,7 @@
   <script src="attendance.js"></script>
   <script src="registration.js"></script>
   <script src="exam.js"></script>
+  <script src="exceptions.js"></script>
   <script>
     async function main() {
       let user = document.getElementById("user");
@@ -50,34 +51,34 @@
       let subjectAttendance = await w.get_subject_daily_attendance(sem, subjectid, individualsubjectcode, subjectcomponentids);
       console.log(subjectAttendance);
 
-      // let registerdSems = await w.get_registered_semesters();
-      // let latestSem = registerdSems[0];
-      // let registeredSubjects = await w.get_registered_subjects_and_faculties(latestSem);
-      // console.log(registeredSubjects);
+      let registerdSems = await w.get_registered_semesters();
+      let latestSem = registerdSems[0];
+      let registeredSubjects = await w.get_registered_subjects_and_faculties(latestSem);
+      console.log(registeredSubjects);
 
-      // let examSems = await w.get_semesters_for_exam_events();
-      // latestSem = examSems[0];
-      // let examEvents = await w.get_exam_events(latestSem);
-      // console.log(examEvents);
-      // let examSchedule = await w.get_exam_schedule(examEvents[0]);
-      // console.log(examSchedule);
+      let examSems = await w.get_semesters_for_exam_events();
+      latestSem = examSems[0];
+      let examEvents = await w.get_exam_events(latestSem);
+      console.log(examEvents);
+      let examSchedule = await w.get_exam_schedule(examEvents[0]);
+      console.log(examSchedule);
 
 
-      // let gradeCardSems = await w.get_semesters_for_grade_card();
-      // console.log(gradeCardSems);
-      // let gradeCard = await w.get_grade_card(gradeCardSems[0]);
-      // console.log(gradeCard);
+      let gradeCardSems = await w.get_semesters_for_grade_card();
+      console.log(gradeCardSems);
+      let gradeCard = await w.get_grade_card(gradeCardSems[0]);
+      console.log(gradeCard);
 
-      // let sgpaCgpa = await w.get_sgpa_cgpa();
-      // console.log(sgpaCgpa);
+      let sgpaCgpa = await w.get_sgpa_cgpa();
+      console.log(sgpaCgpa);
 
-      // let personalInfo = await w.get_personal_info();
-      // console.log(personalInfo);
+      let personalInfo = await w.get_personal_info();
+      console.log(personalInfo);
 
-      // let marksSems = await w.get_semesters_for_marks();
-      // latestSem = marksSems[0];
-      // let marks = await w.download_marks(latestSem);
-      // console.log(marks);
+      let marksSems = await w.get_semesters_for_marks();
+      latestSem = marksSems[0];
+      let marks = await w.download_marks(latestSem);
+      console.log(marks);
 
     }
   </script>

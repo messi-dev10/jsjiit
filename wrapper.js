@@ -1,19 +1,6 @@
 const API = "https://webportal.jiit.ac.in:6011/StudentPortalAPI";
 const DEFCAPTCHA = { captcha: "phw5n", hidden: "gmBctEffdSg=" };
 
-function authenticated(method) {
-  /**
-   * @param {Function} method - A method of WebPortal class
-   * @returns {Function} - A wrapper for the method with session validation checks
-   */
-  return function (...args) {
-    if (this.session == null) {
-      throw new NotLoggedIn();
-    }
-    return method.apply(this, args);
-  };
-}
-
 class WebPortalSession {
   constructor(resp) {
     this.raw_response = resp;
@@ -349,3 +336,42 @@ class WebPortal {
     return resp["response"];
   }
 }
+
+
+function authenticated(method) {
+  /**
+   * @param {Function} method - A method of WebPortal class
+   * @returns {Function} - A wrapper for the method with session validation checks
+   */
+  return function (...args) {
+    if (this.session == null) {
+      throw new NotLoggedIn();
+    }
+    return method.apply(this, args);
+  };
+}
+
+const authenticatedMethods = [
+  'get_personal_info',
+  'get_student_bank_info',
+  'change_password',
+  'get_attendance_meta',
+  'get_attendance',
+  'get_subject_daily_attendance',
+  'get_registered_semesters',
+  'get_registered_subjects_and_faculties',
+  'get_semesters_for_exam_events',
+  'get_exam_events',
+  'get_exam_schedule',
+  'get_semesters_for_marks',
+  'download_marks',
+  'get_semesters_for_grade_card',
+  '__get_program_id',
+  'get_grade_card',
+  '__get_semester_number',
+  'get_sgpa_cgpa'
+];
+
+authenticatedMethods.forEach(methodName => {
+  WebPortal.prototype[methodName] = authenticated(WebPortal.prototype[methodName]);
+});
