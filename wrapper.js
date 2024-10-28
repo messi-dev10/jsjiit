@@ -15,12 +15,6 @@ function authenticated(method) {
     if (this.session == null) {
       throw new NotLoggedIn();
     }
-
-    // Uncomment this block if session expiry check is needed
-    // if (this.session.expiry < new Date()) {
-    //     throw new SessionExpired();
-    // }
-
     return method.apply(this, args);
   };
 }
@@ -326,24 +320,6 @@ async function get_semesters_for_marks() {
   }
 }
 
-// async function get_marks(semester) {
-//   const ENDPOINT = "/studentsexamview/getstudent-exammarks";
-//   const payload = {
-//     companyid: null,
-//     instituteid: session.instituteid,
-//     memberid: session.memberid,
-//     registrationid: semester.registration_id,
-//   };
-//   const localname = await generateLocalName();
-//   let _headers = session.getHeaders(localname);
-//   try {
-//     const resp = await __hit("POST", API + ENDPOINT, { json: payload, authenticated: true }, _headers);
-//     return
-//   } catch (error) {
-//     throw new APIError(error);
-//   }
-// }
-
 async function download_marks(semester) {
   const ENDPOINT =
     "/studentsexamview/printstudent-exammarks/" +
@@ -358,13 +334,23 @@ async function download_marks(semester) {
   let _headers = session.getHeaders(localname);
   const fetchOptions = {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ..._headers,
-    },
+    headers: _headers,
   };
-  const resp = await fetch(API + ENDPOINT, fetchOptions);
-  return resp;
+
+  try {
+    const resp = await fetch(API + ENDPOINT, fetchOptions);
+    const blob = await resp.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `marks_${semester.registration_code}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+  } catch (error) {
+    throw new APIError(error);
+  }
 }
 
 async function get_semesters_for_grade_card() {
