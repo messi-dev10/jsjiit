@@ -1,3 +1,8 @@
+import { NotLoggedIn, SessionExpired, SessionError, AccountAPIError, LoginError, APIError } from "./exceptions.js";
+import { RegisteredSubject, Registrations } from "./registration.js";
+import { AttendanceMeta, AttendanceHeader } from "./attendance.js";
+import { ExamEvent } from "./exam.js";
+
 /**
  * @module Wrapper
  */
@@ -5,18 +10,18 @@
  * Base API endpoint for the JIIT web portal
  * @constant {string}
  */
-const API = "https://webportal.jiit.ac.in:6011/StudentPortalAPI";
+export const API = "https://webportal.jiit.ac.in:6011/StudentPortalAPI";
 
 /**
  * Default CAPTCHA values used for login
  * @constant {{captcha: string, hidden: string}}
  */
-const DEFCAPTCHA = { captcha: "phw5n", hidden: "gmBctEffdSg=" };
+export const DEFCAPTCHA = { captcha: "phw5n", hidden: "gmBctEffdSg=" };
 
 /**
  * Class representing a session with the web portal
  */
-class WebPortalSession {
+export class WebPortalSession {
   /**
    * Creates a WebPortalSession instance from API response
    * @param {Object} resp - Response object from login API
@@ -66,7 +71,7 @@ class WebPortalSession {
 /**
  * Main class for interacting with the JIIT web portal API
  */
-class WebPortal {
+export class WebPortal {
   /**
    * Creates a WebPortal instance
    */
@@ -529,5 +534,3 @@ const authenticatedMethods = [
 authenticatedMethods.forEach((methodName) => {
   WebPortal.prototype[methodName] = authenticated(WebPortal.prototype[methodName]);
 });
-
-export { WebPortal, WebPortalSession };

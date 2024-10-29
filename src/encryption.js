@@ -1,3 +1,5 @@
+import { generate_date_seq, get_random_char_seq } from "./utils.js";
+
 /**
  * @module Encryption
  */

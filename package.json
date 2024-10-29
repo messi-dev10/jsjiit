@@ -12,7 +12,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "docs": "jsdoc -c jsdoc.conf.json --verbose",
-    "build": "esbuild src/index.js --bundle --outfile=dist/jsjiit.js --platform=browser",
+    "build": "node build.mjs",
     "prepare": "npm run build"
   },
   "repository": {

@@ -2,7 +2,7 @@
  * @module JSJIIT
  */
 // Import all classes
-import { WebPortal, WebPortalSession } from "./wrapper.js";
+import { WebPortal, WebPortalSession, API, DEFCAPTCHA } from "./wrapper.js";
 import { AttendanceHeader, Semester, AttendanceMeta } from "./attendance.js";
 import { RegisteredSubject, Registrations } from "./registration.js";
 import { ExamEvent } from "./exam.js";
@@ -12,6 +12,8 @@ import { APIError, LoginError, AccountAPIError, NotLoggedIn, SessionError, Sessi
 export {
   WebPortal,
   WebPortalSession,
+  API,
+  DEFCAPTCHA,
   AttendanceHeader,
   Semester,
   AttendanceMeta,
