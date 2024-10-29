@@ -4,7 +4,7 @@
 // Import all classes
 import { WebPortal, WebPortalSession } from "./wrapper.js";
 import { AttendanceHeader, Semester, AttendanceMeta } from "./attendance.js";
-import { Registrations } from "./registration.js";
+import { RegisteredSubject, Registrations } from "./registration.js";
 import { ExamEvent } from "./exam.js";
 import { APIError, LoginError, AccountAPIError, NotLoggedIn, SessionError, SessionExpired } from "./exceptions.js";
 
@@ -15,6 +15,7 @@ export {
   AttendanceHeader,
   Semester,
   AttendanceMeta,
+  RegisteredSubject,
   Registrations,
   ExamEvent,
   APIError,

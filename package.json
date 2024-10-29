@@ -3,12 +3,14 @@
   "version": "0.0.2",
   "description": "Browser-compatible API for interacting with JIIT (Jaypee Institute of Information Technology) WebPortal. Bypasses CAPTCHA :)",
   "main": "src/index.js",
+  "type": "module",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "docs": "jsdoc -c jsdoc.conf.json --verbose"
+    "docs": "jsdoc -c jsdoc.conf.json --verbose",
+    "build": "esbuild src/index.js --bundle --outfile=dist/jsjiit.js --platform=browser"
   },
   "repository": {
     "type": "git",
@@ -42,6 +44,7 @@
   },
   "homepage": "https://github.com/codeblech/jsjiit#readme",
   "devDependencies": {
+    "esbuild": "0.24.0",
     "jsdoc": "^4.0.4"
   }
 }

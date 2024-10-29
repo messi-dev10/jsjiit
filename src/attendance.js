@@ -62,7 +62,7 @@ export class AttendanceMeta {
    * Returns the latest AttendanceHeader
    * @returns {AttendanceHeader} The first header in the list
    */
-  latestHeader() {
+  latest_header() {
     return this.headers[0];
   }
 
@@ -70,7 +70,7 @@ export class AttendanceMeta {
    * Returns the latest Semester
    * @returns {Semester} The first semester in the list
    */
-  latestSemester() {
+  latest_semester() {
     return this.semesters[0];
   }
 }
