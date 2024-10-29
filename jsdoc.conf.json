@@ -2,7 +2,8 @@
     "source": {
         "include": [
             "src",
-            "package.json"
+            "package.json",
+            "README.md"
         ],
         "exclude": [
             "node_modules"
