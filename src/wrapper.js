@@ -2,6 +2,7 @@ import { NotLoggedIn, SessionExpired, SessionError, AccountAPIError, LoginError,
 import { RegisteredSubject, Registrations } from "./registration.js";
 import { AttendanceMeta, AttendanceHeader } from "./attendance.js";
 import { ExamEvent } from "./exam.js";
+import { generate_local_name, serialize_payload } from "./encryption.js";
 
 /**
  * @module Wrapper
