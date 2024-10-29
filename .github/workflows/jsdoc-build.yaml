@@ -16,3 +16,8 @@ jobs:
           recurse: true
           output_dir: docs
           config_file: jsdoc.conf.json
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
