@@ -4,7 +4,7 @@ because manually checking attendance is destroying my mental health fr fr (and b
 
 ## what even is this
 
-a javascript wrapper that lets you programmatically interact with JIIT's web portal. one must imagine the developer happy.
+a browser-compatible javascript wrapper that lets you programmatically interact with JIIT's web portal. one must imagine the developer happy.
 
 god knew i'd be too powerful if I could solve captchas everyday so here we are
 
@@ -18,11 +18,14 @@ god knew i'd be too powerful if I could solve captchas everyday so here we are
 
 ## how to use this (if you're still here)
 
-first import the `WebPortal` class:
+first import the `WebPortal` class inside a `<script type="module">` tag:
 
 ```javascript
-import { WebPortal } from './src/wrapper.js';
+import { WebPortal } from 'https://cdn.jsdelivr.net/npm/jsjiit@0.0.9/dist/jsjiit.min.esm.js';
 ```
+
+> [!IMPORTANT]
+> if this version causes issues, use the latest version from the cdn (even if i forget to update these docs). use the [npm link](https://www.npmjs.com/package/jsjiit) to find the latest version number.
 
 then let's speedrun this depression:
 
