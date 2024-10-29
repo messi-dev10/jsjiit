@@ -7,7 +7,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Build
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Build docs
         uses: andstor/jsdoc-action@v1
         with:
           source_dir: src
