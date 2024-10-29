@@ -46,8 +46,8 @@ const grades = await portal.get_grade_card(latestSem);
 ```javascript
 // get attendance (prepare for disappointment)
 const meta = await portal.get_attendance_meta();
-const sem = meta.latestSemester();
-const header = meta.latestHeader();
+const sem = meta.latest_semester();
+const header = meta.latest_header();
 const attendance = await portal.get_attendance(header, sem);
 ```
 ```javascript
