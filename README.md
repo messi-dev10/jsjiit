@@ -21,7 +21,7 @@ god knew i'd be too powerful if I could solve captchas everyday so here we are
 first import the `WebPortal` class inside a `<script type="module">` tag:
 
 ```javascript
-import { WebPortal } from 'https://cdn.jsdelivr.net/npm/jsjiit@0.0.10/dist/jsjiit.min.esm.js';
+import { WebPortal } from 'https://cdn.jsdelivr.net/npm/jsjiit@0.0.11/dist/jsjiit.min.esm.js';
 ```
 
 > [!IMPORTANT]
@@ -65,34 +65,34 @@ if (attendance["studentattendancelist"][subjectIndex][possibleComponentCode]) {
     subjectcomponentids.push(attendance["studentattendancelist"][subjectIndex][possibleComponentCode]);
 }
 }
-let subjectAttendance = await w.get_subject_daily_attendance(sem, subjectid, individualsubjectcode, subjectcomponentids);
+let subjectAttendance = await portal.get_subject_daily_attendance(sem, subjectid, individualsubjectcode, subjectcomponentids);
 ```
 ```javascript
 // Check SGPA & CGPA
-const sgpaCgpa = await w.get_sgpa_cgpa();
+const sgpaCgpa = await portal.get_sgpa_cgpa();
 ```
 ```javascript
 // Download marks for a semester
-const marksSems = await w.get_semesters_for_marks();
+const marksSems = await portal.get_semesters_for_marks();
 const previousSem = marksSems[1];
-const marks = await w.download_marks(previousSem);
+const marks = await portal.download_marks(previousSem);
 ```
 ```javascript
 // Get registered subjects & faculties for a semester
-const registerdSems = await w.get_registered_semesters();
+const registerdSems = await portal.get_registered_semesters();
 const latestSem = registerdSems[0];
-const registeredSubjects = await w.get_registered_subjects_and_faculties(latestSem);
+const registeredSubjects = await portal.get_registered_subjects_and_faculties(latestSem);
 ```
 ```javascript
 // Get Exam Schedule & Venue
-const examSems = await w.get_semesters_for_exam_events();
+const examSems = await portal.get_semesters_for_exam_events();
 const latestSem = examSems[0];
-const examEvents = await w.get_exam_events(latestSem);
-const examSchedule = await w.get_exam_schedule(examEvents[0]);
+const examEvents = await portal.get_exam_events(latestSem);
+const examSchedule = await portal.get_exam_schedule(examEvents[0]);
 ```
 ```javascript
 // Get Personal info like name, address ...
-const personalInfo = await w.get_personal_info();
+const personalInfo = await portal.get_personal_info();
 ```
 
 ## we're all gonna make it
