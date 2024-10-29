@@ -1,0 +1,7 @@
+cert.pem
+key.pem
+.vscode
+docs
+node_modules
+run_server
+index.html
