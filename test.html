@@ -4,8 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
-  <!-- <link href="css/style.css" rel="stylesheet"> -->
+  <title>jsjiit</title>
 </head>
 
 <body>
@@ -15,15 +14,10 @@
   <input id="pass" name="pass" type="text"></input>
   <button onclick="main();">Submit</button>
 
-  <script src="utils.js"></script>
-  <script src="encryption.js"></script>
-  <script src="wrapper.js"></script>
-  <script src="attendance.js"></script>
-  <script src="registration.js"></script>
-  <script src="exam.js"></script>
-  <script src="exceptions.js"></script>
-  <script>
-    async function main() {
+  <script type="module">
+    // import { WebPortal } from "https://cdn.jsdelivr.net/npm/jsjiit@0.0.11/dist/jsjiit.esm.js"; // exact version
+    import { WebPortal } from "https://cdn.jsdelivr.net/npm/jsjiit/dist/jsjiit.esm.js"; // latest version
+    window.main = async function main() {
       let user = document.getElementById("user");
       let pass = document.getElementById("pass");
       let w = new WebPortal();
@@ -37,7 +31,6 @@
       let attendance = await w.get_attendance(header, sem);
       console.log(attendance);
 
-      // code to get the subject attendance
       let subjectIndex = 1;
       let subjectid = attendance["studentattendancelist"][subjectIndex]["subjectid"];
       let individualsubjectcode = attendance["studentattendancelist"][subjectIndex]["individualsubjectcode"];
