@@ -1,13 +1,36 @@
 import esbuild from "esbuild";
 
-esbuild
-  .build({
-    entryPoints: ["src/index.js"], // Your main JavaScript file that imports the others
-    bundle: true, // Bundle all dependencies into a single file
-    outfile: "dist/jsjiit.esm.js", // Output file
-    format: "esm", // Use ES modules format
-    minify: false, // Minify the output
-    sourcemap: true, // Generate source maps for debugging
-    target: ["es2020"], // Target browser compatibility
-  })
-  .catch(() => process.exit(1));
+const commonConfig = {
+  entryPoints: ["src/index.js"], // Your main JavaScript file that imports the others
+  bundle: true, // Bundle all dependencies into a single file
+  format: "esm", // Use ES modules format
+  sourcemap: true, // Generate source maps for debugging
+  target: ["es2020"], // Target browser compatibility
+};
+
+async function build() {
+  try {
+    // Production (minified) build
+    await esbuild.build({
+      ...commonConfig,
+      outfile: "dist/jsjiit.min.esm.js",
+      minify: true,
+    });
+    console.log("✅ Production build complete");
+
+    // Development (unminified) build
+    await esbuild.build({
+      ...commonConfig,
+      outfile: "dist/jsjiit.esm.js",
+      minify: false,
+    });
+    console.log("✅ Development build complete");
+
+    console.log("🎉 All builds completed successfully!");
+  } catch (error) {
+    console.error("❌ Build failed:", error);
+    process.exit(1);
+  }
+}
+
+build();
