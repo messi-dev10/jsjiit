@@ -30,8 +30,8 @@
       await w.student_login(user.value, pass.value);
 
       const meta = await w.get_attendance_meta()
-      let sem = meta.latestSemester();
-      let header = meta.latestHeader();
+      let sem = meta.latest_semester();
+      let header = meta.latest_header();
       console.log("Latest semester:", sem);
       console.log("Latest header:", header);
       let attendance = await w.get_attendance(header, sem);
