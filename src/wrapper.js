@@ -1,6 +1,6 @@
 import { NotLoggedIn, SessionExpired, SessionError, AccountAPIError, LoginError, APIError } from "./exceptions.js";
 import { RegisteredSubject, Registrations } from "./registration.js";
-import { AttendanceMeta, AttendanceHeader } from "./attendance.js";
+import { AttendanceMeta, AttendanceHeader, Semester } from "./attendance.js";
 import { ExamEvent } from "./exam.js";
 import { generate_local_name, serialize_payload } from "./encryption.js";
 
