@@ -2,9 +2,9 @@
   "name": "jsjiit",
   "version": "0.0.8",
   "description": "Browser-compatible API for interacting with JIIT (Jaypee Institute of Information Technology) WebPortal. Bypasses CAPTCHA :)",
-  "main": "dist/jsjiit.js",
-  "module": "dist/jsjiit.js",
-  "browser": "dist/jsjiit.js",
+  "main": "src/index.js",
+  "module": "dist/jsjiit.esm.js",
+  "browser": "dist/jsjiit.esm.js",
   "type": "module",
   "directories": {
     "doc": "docs"
@@ -20,11 +20,12 @@
     "url": "git+https://github.com/codeblech/jsjiit.git"
   },
   "exports": {
-    "import": "./dist/jsjiit.js",
-    "require": "./dist/jsjiit.js"
+    "import": "./dist/jsjiit.esm.js",
+    "require": "./dist/jsjiit.esm.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "keywords": [
     "jaypee",
