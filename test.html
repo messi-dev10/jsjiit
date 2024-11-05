@@ -31,25 +31,27 @@
       let attendance = await w.get_attendance(header, sem);
       console.log(attendance);
 
-      let subjectIndex = 1;
-      let subjectid = attendance["studentattendancelist"][subjectIndex]["subjectid"];
-      let individualsubjectcode = attendance["studentattendancelist"][subjectIndex]["individualsubjectcode"];
-      const possibleComponentCodes = ["Lsubjectcomponentid", "Psubjectcomponentid", "Tsubjectcomponentid"]
-      let subjectcomponentids = [];
-      for (let possibleComponentCode of possibleComponentCodes) {
-        if (attendance["studentattendancelist"][subjectIndex][possibleComponentCode]) {
-          subjectcomponentids.push(attendance["studentattendancelist"][subjectIndex][possibleComponentCode]);
-        }
-      }
-      let subjectAttendance = await w.get_subject_daily_attendance(sem, subjectid, individualsubjectcode, subjectcomponentids);
-      console.log(subjectAttendance);
+      // let subjectIndex = 1;
+      // let subjectid = attendance["studentattendancelist"][subjectIndex]["subjectid"];
+      // let individualsubjectcode = attendance["studentattendancelist"][subjectIndex]["individualsubjectcode"];
+      // const possibleComponentCodes = ["Lsubjectcomponentid", "Psubjectcomponentid", "Tsubjectcomponentid"]
+      // let subjectcomponentids = [];
+      // for (let possibleComponentCode of possibleComponentCodes) {
+      //   if (attendance["studentattendancelist"][subjectIndex][possibleComponentCode]) {
+      //     subjectcomponentids.push(attendance["studentattendancelist"][subjectIndex][possibleComponentCode]);
+      //   }
+      // }
+      // let subjectAttendance = await w.get_subject_daily_attendance(sem, subjectid, individualsubjectcode, subjectcomponentids);
+      // console.log(subjectAttendance);
 
       let registerdSems = await w.get_registered_semesters();
       let latestSem = registerdSems[0];
       let registeredSubjects = await w.get_registered_subjects_and_faculties(latestSem);
       console.log(registeredSubjects);
-
+      console.log("--------------------------------");
       let examSems = await w.get_semesters_for_exam_events();
+      console.log(examSems);
+      console.log(typeof examSems);
       latestSem = examSems[0];
       let examEvents = await w.get_exam_events(latestSem);
       console.log(examEvents);

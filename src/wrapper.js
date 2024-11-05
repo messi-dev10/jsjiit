@@ -129,9 +129,16 @@ export class WebPortal {
     } else {
       fetchOptions.body = options.body;
     }
+
     try {
       console.log("fetching", url, "with options", fetchOptions);
       const response = await fetch(url, fetchOptions);
+
+      // Handle HTTP 513 error
+      if (response.status === 513) {
+        throw new exception("JIIT Web Portal server is temporarily unavailable (HTTP 513). Please try again later.");
+      }
+
       const resp = await response.json();
 
       if (resp.status && resp.status.responseStatus !== "Success") {
@@ -139,6 +146,10 @@ export class WebPortal {
       }
       return resp;
     } catch (error) {
+      // Handle CORS errors
+      if (error instanceof TypeError && error.message.includes('CORS')) {
+        throw new exception("JIIT Web Portal server is temporarily unavailable. Please try again later.");
+      }
       throw new exception(error.message || "Unknown error");
     }
   }
