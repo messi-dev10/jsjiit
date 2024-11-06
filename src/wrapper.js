@@ -140,6 +140,9 @@ export class WebPortal {
       }
 
       const resp = await response.json();
+      if (typeof resp.status === 'number' && resp.status === 401) {
+          throw new SessionExpired(resp.error);
+      }
 
       if (resp.status && resp.status.responseStatus !== "Success") {
         throw new exception(`status:\n${JSON.stringify(resp.status, null, 2)}`);
