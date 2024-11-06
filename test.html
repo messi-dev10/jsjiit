@@ -16,12 +16,21 @@
 
   <script type="module">
     // import { WebPortal } from "https://cdn.jsdelivr.net/npm/jsjiit@0.0.11/dist/jsjiit.esm.js"; // exact version
-    import { WebPortal } from "https://cdn.jsdelivr.net/npm/jsjiit/dist/jsjiit.esm.js"; // latest version
+    import { WebPortal, LoginError } from "https://cdn.jsdelivr.net/npm/jsjiit/dist/jsjiit.esm.js"; // latest version
     window.main = async function main() {
       let user = document.getElementById("user");
       let pass = document.getElementById("pass");
       let w = new WebPortal();
-      await w.student_login(user.value, pass.value);
+      try {
+        await w.student_login(user.value, pass.value);
+      } catch (e) {
+        if (e instanceof LoginError) {
+          console.log("handling login error");
+          console.log(e);
+          console.log("--------------------------------");
+          return;
+        }
+      }
 
       const meta = await w.get_attendance_meta()
       let sem = meta.latest_semester();
