@@ -134,15 +134,14 @@ export class WebPortal {
       console.log("fetching", url, "with options", fetchOptions);
       const response = await fetch(url, fetchOptions);
 
-      // Handle HTTP 513 error
       if (response.status === 513) {
         throw new exception("JIIT Web Portal server is temporarily unavailable (HTTP 513). Please try again later.");
       }
-
-      const resp = await response.json();
-      if (typeof resp.status === 'number' && resp.status === 401) {
+      if (resp.status === 401) {
           throw new SessionExpired(resp.error);
       }
+
+      const resp = await response.json();
 
       if (resp.status && resp.status.responseStatus !== "Success") {
         throw new exception(`status:\n${JSON.stringify(resp.status, null, 2)}`);
