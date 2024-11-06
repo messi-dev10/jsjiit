@@ -137,8 +137,8 @@ export class WebPortal {
       if (response.status === 513) {
         throw new exception("JIIT Web Portal server is temporarily unavailable (HTTP 513). Please try again later.");
       }
-      if (resp.status === 401) {
-          throw new SessionExpired(resp.error);
+      if (response.status === 401) {
+          throw new SessionExpired(response.error);
       }
 
       const resp = await response.json();
