@@ -7,6 +7,7 @@ import { AttendanceHeader, Semester, AttendanceMeta } from "./attendance.js";
 import { RegisteredSubject, Registrations } from "./registration.js";
 import { ExamEvent } from "./exam.js";
 import { APIError, LoginError, AccountAPIError, NotLoggedIn, SessionError, SessionExpired } from "./exceptions.js";
+import {generate_local_name} from "./encryption.js";
 
 // Re-export everything
 export {
@@ -26,4 +27,5 @@ export {
   SessionExpired,
   AccountAPIError,
   NotLoggedIn,
+  generate_local_name,
 };
