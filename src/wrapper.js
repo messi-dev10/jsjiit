@@ -100,7 +100,7 @@ export class WebPortal {
       exception = options.exception;
       delete options.exception;
     }
-    
+
     console.log(options)
     let header;
     if (options.authenticated) {
@@ -450,9 +450,9 @@ export class WebPortal {
    */
   async __get_program_id() {
     const ENDPOINT = "/studentgradecard/getstudentinfo";
-    const payload = {
+    const payload = await serialize_payload({
       instituteid: this.session.instituteid,
-    };
+    });
     const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"]["programid"];
   }

@@ -15,8 +15,9 @@
   <button onclick="main();">Submit</button>
 
   <script type="module">
-    // import { WebPortal } from "https://cdn.jsdelivr.net/npm/jsjiit@0.0.11/dist/jsjiit.esm.js"; // exact version
-    import { WebPortal, LoginError } from "https://cdn.jsdelivr.net/npm/jsjiit/dist/jsjiit.esm.js"; // latest version
+    // import { WebPortal, LoginError } from "https://cdn.jsdelivr.net/npm/jsjiit@0.0.17/dist/jsjiit.esm.js"; // exact version
+    // import { WebPortal, LoginError } from "https://cdn.jsdelivr.net/npm/jsjiit/dist/jsjiit.esm.js"; // latest version
+    import { WebPortal, LoginError } from "./src/index.js"
     window.main = async function main() {
       let user = document.getElementById("user");
       let pass = document.getElementById("pass");
@@ -32,13 +33,13 @@
         }
       }
 
-      const meta = await w.get_attendance_meta()
-      let sem = meta.latest_semester();
-      let header = meta.latest_header();
-      console.log("Latest semester:", sem);
-      console.log("Latest header:", header);
-      let attendance = await w.get_attendance(header, sem);
-      console.log(attendance);
+      // const meta = await w.get_attendance_meta()
+      // let sem = meta.semesters[1];
+      // let header = meta.latest_header();
+      // console.log("Latest semester:", sem);
+      // console.log("Latest header:", header);
+      // let attendance = await w.get_attendance(header, sem);
+      // console.log(attendance);
 
       // let subjectIndex = 1;
       // let subjectid = attendance["studentattendancelist"][subjectIndex]["subjectid"];
@@ -53,19 +54,19 @@
       // let subjectAttendance = await w.get_subject_daily_attendance(sem, subjectid, individualsubjectcode, subjectcomponentids);
       // console.log(subjectAttendance);
 
-      let registerdSems = await w.get_registered_semesters();
-      let latestSem = registerdSems[0];
-      let registeredSubjects = await w.get_registered_subjects_and_faculties(latestSem);
-      console.log(registeredSubjects);
-      console.log("--------------------------------");
-      let examSems = await w.get_semesters_for_exam_events();
-      console.log(examSems);
-      console.log(typeof examSems);
-      latestSem = examSems[0];
-      let examEvents = await w.get_exam_events(latestSem);
-      console.log(examEvents);
-      let examSchedule = await w.get_exam_schedule(examEvents[0]);
-      console.log(examSchedule);
+      // let registerdSems = await w.get_registered_semesters();
+      // let latestSem = registerdSems[0];
+      // let registeredSubjects = await w.get_registered_subjects_and_faculties(latestSem);
+      // console.log(registeredSubjects);
+      // console.log("--------------------------------");
+      // let examSems = await w.get_semesters_for_exam_events();
+      // console.log(examSems);
+      // console.log(typeof examSems);
+      // latestSem = examSems[0];
+      // let examEvents = await w.get_exam_events(latestSem);
+      // console.log(examEvents);
+      // let examSchedule = await w.get_exam_schedule(examEvents[0]);
+      // console.log(examSchedule);
 
 
       let gradeCardSems = await w.get_semesters_for_grade_card();
@@ -73,16 +74,16 @@
       let gradeCard = await w.get_grade_card(gradeCardSems[0]);
       console.log(gradeCard);
 
-      let sgpaCgpa = await w.get_sgpa_cgpa();
-      console.log(sgpaCgpa);
+      // let sgpaCgpa = await w.get_sgpa_cgpa();
+      // console.log(sgpaCgpa);
 
-      let personalInfo = await w.get_personal_info();
-      console.log(personalInfo);
+      // let personalInfo = await w.get_personal_info();
+      // console.log(personalInfo);
 
-      let marksSems = await w.get_semesters_for_marks();
-      latestSem = marksSems[0];
-      let marks = await w.download_marks(latestSem);
-      console.log(marks);
+      // let marksSems = await w.get_semesters_for_marks();
+      // latestSem = marksSems[0];
+      // let marks = await w.download_marks(latestSem);
+      // console.log(marks);
 
     }
   </script>
