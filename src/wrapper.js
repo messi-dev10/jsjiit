@@ -369,11 +369,11 @@ export class WebPortal {
    */
   async get_exam_schedule(exam_event) {
     const ENDPOINT = "/studentsttattview/getstudent-examschedule";
-    const payload = {
+    const payload = await serialize_payload({
       instituteid: this.session.instituteid,
       registrationid: exam_event.registration_id,
       exameventid: exam_event.exam_event_id,
-    };
+    });
     const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"];
   }
