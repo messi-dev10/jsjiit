@@ -400,8 +400,8 @@ export class WebPortal {
   async download_marks(semester) {
     const ENDPOINT =
       "/studentsexamview/printstudent-exammarks/" +
-      this.session.memberid +
-      "/" +
+      // this.session.memberid +
+      // "/" +
       this.session.instituteid +
       "/" +
       semester.registration_id +

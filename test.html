@@ -74,16 +74,16 @@
       let gradeCard = await w.get_grade_card(gradeCardSems[0]);
       console.log(gradeCard);
 
-      // let sgpaCgpa = await w.get_sgpa_cgpa();
-      // console.log(sgpaCgpa);
+      let sgpaCgpa = await w.get_sgpa_cgpa();
+      console.log(sgpaCgpa);
 
-      // let personalInfo = await w.get_personal_info();
-      // console.log(personalInfo);
+      let personalInfo = await w.get_personal_info();
+      console.log(personalInfo);
 
-      // let marksSems = await w.get_semesters_for_marks();
-      // latestSem = marksSems[0];
-      // let marks = await w.download_marks(latestSem);
-      // console.log(marks);
+      let marksSems = await w.get_semesters_for_marks();
+      let latestSem = marksSems[0];
+      let marks = await w.download_marks(latestSem);
+      console.log(marks);
 
     }
   </script>
