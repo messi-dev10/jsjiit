@@ -101,7 +101,7 @@ export class WebPortal {
       delete options.exception;
     }
 
-    console.log(options)
+    console.log(options);
     let header;
     if (options.authenticated) {
       header = await this.session.get_headers(); // Assumes calling method is authenticated
@@ -139,7 +139,7 @@ export class WebPortal {
         throw new exception("JIIT Web Portal server is temporarily unavailable (HTTP 513). Please try again later.");
       }
       if (response.status === 401) {
-          throw new SessionExpired(response.error);
+        throw new SessionExpired(response.error);
       }
 
       const resp = await response.json();
@@ -150,7 +150,7 @@ export class WebPortal {
       return resp;
     } catch (error) {
       // Handle CORS errors
-      if (error instanceof TypeError && error.message.includes('CORS')) {
+      if (error instanceof TypeError && error.message.includes("CORS")) {
         throw new exception("JIIT Web Portal server is temporarily unavailable. Please try again later.");
       }
       throw new exception(error.message || "Unknown error");
@@ -506,6 +506,101 @@ export class WebPortal {
     });
     const resp = await this.__hit("POST", API + ENDPOINT, { json: payload, authenticated: true });
     return resp["response"];
+  }
+
+  async fill_feedback_form(feedback_option) {
+    const SEMESTER_ENDPOINT = "/feedbackformcontroller/getFeedbackEvent";
+    const payload = {
+      instituteid: this.session.instituteid,
+    };
+    const resp = await this.__hit("POST", API + SEMESTER_ENDPOINT, { json: payload, authenticated: true });
+    let semesters = resp["response"]["eventList"];
+    let latest_semester = semesters[semesters.length - 1];
+    let latest_semester_code = latest_semester["eventcode"];
+    let latest_semester_event_id = latest_semester["eventid"];
+    let latest_semester_event_description = latest_semester["eventdescription"];
+
+    const GRID_ENDPOINT = "/feedbackformcontroller/getGriddataForFeedback";
+    const grid_payload = await serialize_payload({
+      instituteid: this.session.instituteid,
+      studentid: this.session.memberid,
+      eventid: latest_semester_event_id,
+    });
+    const grid_resp = await this.__hit("POST", API + GRID_ENDPOINT, { json: grid_payload, authenticated: true });
+    let grid_data = grid_resp["response"]["gridData"];
+
+    // instituteid
+    // eventid
+    // eventdescription
+    let question_feedback_payload_array = grid_data.map((data) => {
+      return {
+        instituteid: this.session.instituteid,
+        eventid: latest_semester_event_id,
+        eventdescription: latest_semester_event_description,
+        facultyid: data["employeeid"],
+        facultyname: data["employeename"],
+        registrationid: data["registrationid"],
+        studentid: data["studentid"],
+        subjectcode: data["subjectcode"],
+        subjectcomponentcode: data["subjectcomponentcode"],
+        subjectcomponentid: data["subjectcomponentid"],
+        subjectdescription: data["subjectdescription"],
+        subjectid: data["subjectid"],
+      };
+    });
+    const GET_QUESTIONS_ENDPOINT = "/feedbackformcontroller/getIemQuestion";
+    const SAVE_ENDPOINT = "/feedbackformcontroller/savedatalist";
+
+    for (let question_feedback_payload of question_feedback_payload_array) {
+      try {
+        const questions_api_resp = await this.__hit("POST", API + GET_QUESTIONS_ENDPOINT, {
+          json: question_feedback_payload,
+          authenticated: true,
+        });
+      } catch (error) {
+        continue;
+      }
+
+      // Process the response to get the list of questions
+      if (!questions_api_resp || !questions_api_resp.response || !questions_api_resp.response.questionList) {
+        console.error(
+          "Failed to retrieve question list or invalid response structure for payload:",
+          question_feedback_payload,
+          "Response:",
+          questions_api_resp
+        );
+        // Skip to the next feedback item if data is missing
+        continue;
+      }
+      let actual_question_list = questions_api_resp["response"]["questionList"];
+
+      // Update each question with the provided feedback_option
+      let questions_to_submit = actual_question_list.map((q) => ({
+        ...q, // Spread existing question properties
+        rating: feedback_option, // Set the rating using the function's argument
+      }));
+
+      // Construct the payload for saving the feedback
+      let save_data_payload = {
+        instituteid: question_feedback_payload.instituteid, // This comes from this.session.instituteid via map
+        studentid: this.session.memberid, // Logged-in user's ID
+        eventid: question_feedback_payload.eventid, // This comes from latest_semester_event_id via map
+        subjectid: question_feedback_payload.subjectid, // From the specific grid item
+        facultyid: question_feedback_payload.facultyid, // From the specific grid item
+        registrationid: question_feedback_payload.registrationid, // From the specific grid item
+        questionid: questions_to_submit, // The list of questions with updated ratings
+        facultycomments: null, // Defaulting to null; can be parameterized if needed
+        coursecomments: null, // Defaulting to null; can be parameterized if needed
+      };
+      save_data_payload = await serialize_payload(save_data_payload);
+
+      // Send the feedback data to the SAVE_ENDPOINT
+      await this.__hit("POST", API + SAVE_ENDPOINT, {
+        json: save_data_payload,
+        authenticated: true,
+      });
+      // Optionally, collect or handle the response from SAVE_ENDPOINT
+    }
   }
 }
 
